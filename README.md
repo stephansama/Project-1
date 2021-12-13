@@ -12,6 +12,8 @@ A web application that selects and compares data points between two videos
 - YouTube Data API
 
 ### Screenshots
+###### Whiteboard Drawing
+![image](assets/drawing.jpg)
 
 ### TO-DO:
 - search for a YouTube video
