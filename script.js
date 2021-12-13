@@ -23,6 +23,8 @@ $(function () {
     const $queue = $('#queue')
     const $results = $('#results')
 
+    const testImgLoc = ""
+
     // LISTENER EVENTS
     $submit.on('click', submitSearch)
     $results.on('click', 'img', selectVideo)
@@ -103,8 +105,11 @@ $(function () {
         evt.preventDefault()
 
         let ival = $input.val()
-        if(ival === 'test'){
-
+        if (ival === 'test') {
+            $.getJSON('./assets/example.json', function (json) {
+                loadYoutubeVideos(json.items)
+                renderResultThumbnails()
+            })
             return
         }
 
@@ -124,7 +129,6 @@ $(function () {
         renderQueue(kept)
 
         drawGoogleChart()
-        console.log('here')
 
         clearResults()
     }
@@ -148,6 +152,7 @@ $(function () {
 
     function renderQueue(YObj) {
         YObj.idx = queue_videos.length // reassign id
+
         queue_videos.push(YObj)
 
         let $qu = $('<div id="qitem">')
@@ -155,11 +160,11 @@ $(function () {
                 .text('X'))
 
         renderThumbnail(YObj, $qu)
+
         $qu.append($(`<a href="${createYTLink(YObj.vid)}" target="_blank">`)
             .text('>'))
+
         $queue.append($qu)
-
-
     }
 
     function createDataSet(title, values) {
