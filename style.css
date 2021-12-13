@@ -1,0 +1,32 @@
+/* USER DEFINED VARIABLES */
+:root{
+    --main-color0: black;
+    --main-color1: white;
+    --main-color2: gray;
+    --main-color3: red;
+}
+
+body, html{
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: block;
+}
+
+#chart_div{
+    display: flex;
+    width: 70%;
+    height: 35%;
+}
+
+#results{
+    display: flex;
+    justify-content: space-between;
+    height:200px;
+}
+
+#results img{
+    height:100%;
+}
+
