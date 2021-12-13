@@ -20,6 +20,15 @@ body, html{
     height: 35%;
 }
 
+#queue{
+    display: flex;
+    align-content: flex-start;
+}
+
+#queue img{
+    width: 200px;
+}
+
 #results{
     display: flex;
     justify-content: space-between;

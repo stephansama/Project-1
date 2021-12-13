@@ -102,6 +102,12 @@ $(function () {
     function submitSearch(evt) {
         evt.preventDefault()
 
+        let ival = $input.val()
+        if(ival === 'test'){
+
+            return
+        }
+
         $.ajax(createAPILink($input.val())).then(function (data) {
             loadYoutubeVideos(data.items)
             renderResultThumbnails()
