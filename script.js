@@ -4,17 +4,28 @@
 // =====================================
 //
 // Compare the number of letter occurrences
+// items[0]."statistics": {
+//         "viewCount": "8239664",
+//         "likeCount": "36646",
+//         "favoriteCount": "0",
+//         "commentCount": "716"
+//       }
 //
-$(function () {
+// $(function () {
     // GLOBAL VARIABLES
     const API = 'AIzaSyB9-3f8Dlx5-VOfcr_GCtocfwwMFSxwcq8'
-    const API_TEMPLATE = 'https://youtube.googleapis.com/youtube/v3/search?type=video&part=snippet&q=[QUERY]&key=[API]'
+    const SEARCH_API_TEMPLATE = 'https://youtube.googleapis.com/youtube/v3/search?type=video&part=snippet&q=[QUERY]&key=[API]'
+    const STATISTICS_API_TEMPLATE = 'https://www.googleapis.com/youtube/v3/videos?part=statistics&id=[ID]&key=[API]'
     const YTLINK_TEMPLATE = 'https://www.youtube.com/watch?v=[id]'
 
     let result_videos = []
-    let queue_videos = []
+    let queue_videos = [] 
 
-    let letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+    // Google Chart options constant
+    const optionsGC = {
+        title: 'Comparison of YouTube video statistics',
+        hAxis: { title: 'Statistics', },
+        vAxis: { title: 'Count' } };
 
     // DOM ELEMENTS
     const $submit = $('button[type=submit]')
@@ -23,14 +34,11 @@ $(function () {
     const $queue = $('#queue')
     const $results = $('#results')
 
-    const testImgLoc = ""
-
     // LISTENER EVENTS
     $submit.on('click', submitSearch)
     $results.on('click', 'img', selectVideo)
-    $(window).resize(function () {
-        drawGoogleChart()
-    })
+    $queue.on('click', 'button', removeFromQueue)
+    $(window).resize(function () { drawGoogleChart() })
 
     // initial statements
     initApplication()
@@ -47,6 +55,15 @@ $(function () {
             this.description = ajax_obj.snippet.description
             this.channelTitle = ajax_obj.snippet.channelTitle
             this.thumbnailUrl = ajax_obj.snippet.thumbnails.high.url
+            this.containsStats = false
+        }
+
+        addStats(ajax_obj) {
+            this.viewCount = ajax_obj.statistics.viewCount
+            this.likeCount = ajax_obj.statistics.likeCount
+            this.favoriteCount = ajax_obj.statistics.favoriteCount
+            this.commentCount = ajax_obj.statistics.commentCount
+            this.containsStats = true
         }
     }
 
@@ -59,8 +76,14 @@ $(function () {
     }
 
     /** GENERATOR FUNCTIONS **/
-    function createAPILink(query) {
-        let t = API_TEMPLATE.replace('[QUERY]', query)
+    function createSearchAPILink(query) {
+        let t = SEARCH_API_TEMPLATE.replace('[QUERY]', query)
+        t = t.replace('[API]', API)
+        return t
+    }
+
+    function createStatisticsAPILink(id) {
+        let t = STATISTICS_API_TEMPLATE.replace('[ID]', id)
         t = t.replace('[API]', API)
         return t
     }
@@ -85,38 +108,18 @@ $(function () {
         result_videos = []
     }
 
-    function collectOccurrences(str, char) {
-        let occ = 0;
-        str = str.toUpperCase()
-        char = char.toUpperCase()
-
-        for (let i = 0; i < str.length; ++i)
-            if (str[i] === char) {
-                occ++
-                console.log(str[i - 1] + str[i] + str[i + 1])
-            }
-
-        return occ;
-    }
-
-
     /** EVENT FUNCTIONS **/
     function submitSearch(evt) {
         evt.preventDefault()
 
         let ival = $input.val()
         if (ival === 'test') {
-            $.getJSON('./assets/example.json', function (json) {
-                loadYoutubeVideos(json.items)
-                renderResultThumbnails()
-            })
+            $.getJSON('./assets/search.json', loadResults)
+            $input.val('')
             return
         }
 
-        $.ajax(createAPILink($input.val())).then(function (data) {
-            loadYoutubeVideos(data.items)
-            renderResultThumbnails()
-        }, handleError)
+        $.ajax(createSearchAPILink($input.val())).then(loadResults, handleError)
 
         $input.val('')
     }
@@ -128,8 +131,6 @@ $(function () {
 
         renderQueue(kept)
 
-        drawGoogleChart()
-
         clearResults()
     }
 
@@ -138,8 +139,13 @@ $(function () {
     }
 
     /** RENDERING FUNCTIONS **/
+    
+    function loadResults(data) {
+        loadYoutubeVideos(data.items)
+        renderResultThumbnails()
+    }
 
-    function renderThumbnail(YObj, elem = $results) {
+    function renderResultThumbnail(YObj, elem = $results) {
         let thumbnail = $(`<img alt="${YObj.title}" src="${YObj.thumbnailUrl}">`)
             .addClass(`${YObj.idx}`)
         elem.append(thumbnail)
@@ -147,24 +153,32 @@ $(function () {
 
     function renderResultThumbnails() {
         for (let i = 0; i < result_videos.length; i++)
-            renderThumbnail(result_videos[i])
+            renderResultThumbnail(result_videos[i])
     }
 
     function renderQueue(YObj) {
         YObj.idx = queue_videos.length // reassign id
 
-        queue_videos.push(YObj)
+        $.ajax(createStatisticsAPILink(YObj.vid)).then(function (data) {
+            YObj.addStats(data.items[0])
+            queue_videos.push(YObj)
+            drawGoogleChart()
 
-        let $qu = $('<div id="qitem">')
-            .append($('<button>')
-                .text('X'))
+            let $qu = $('<div id="qitem">')
+                .append($('<button>')
+                    .text('X'))
 
-        renderThumbnail(YObj, $qu)
+            renderResultThumbnail(YObj, $qu)
 
-        $qu.append($(`<a href="${createYTLink(YObj.vid)}" target="_blank">`)
-            .text('>'))
+            $qu.append($(`<a href="${createYTLink(YObj.vid)}" target="_blank">`)
+                .text('>'))
 
-        $queue.append($qu)
+            $queue.append($qu)
+        }, handleError)
+    }
+    
+    function removeFromQueue(evt) {
+        evt.preventDefault()
     }
 
     function createDataSet(title, values) {
@@ -172,10 +186,9 @@ $(function () {
     }
 
     function initData() {
-        let data = [['Letters', 'null']]
-        letters.forEach(letter => {
-            data.push([`${letter}`, 0])
-        })
+        let data = [['Datasets', 'null']]
+        data.push(['Views', 0])
+        data.push(['Likes', 0])
 
         return google.visualization.arrayToDataTable(data)
     }
@@ -189,14 +202,11 @@ $(function () {
             title.push(elem.title)
         })
 
-        let data = [title]
+        let data = []
+        data.push(title)
 
-        letters.forEach(letter => {
-            let occur = queue_videos.map(elem => {
-                return collectOccurrences(elem.description, letter)
-            })
-            data.push(createDataSet(`${letter.toUpperCase()}`, occur))
-        })
+        data.push(createDataSet('Views', queue_videos.map(elem => {return parseInt(elem.viewCount)})))
+        data.push(createDataSet('Likes', queue_videos.map(elem => {return parseInt(elem.likeCount)})))
 
         return google.visualization.arrayToDataTable(data)
     }
@@ -204,19 +214,8 @@ $(function () {
     function drawGoogleChart() {
         let data = queue_videos.length === 0 ? initData() : queueToDataTable()
 
-        const options = {
-            title: 'Occurrences of letters in YouTube video descriptions',
-            colors: ['#9575cd', '#33ac71'],
-            hAxis: {
-                title: 'Letters',
-            },
-            vAxis: {
-                title: 'Occurrences'
-            }
-        };
-
         let chart = new google.visualization.ColumnChart($chart[0]);
-        chart.draw(data, options);
+        chart.draw(data, optionsGC);
     }
 
 
@@ -247,4 +246,4 @@ $(function () {
     //     let chart = new google.visualization.PieChart(document.getElementById('chart_div'));
     //     chart.draw(data, options);
     // }
-})
+// })

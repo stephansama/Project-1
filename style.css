@@ -22,7 +22,16 @@ body, html{
 
 #queue{
     display: flex;
-    align-content: flex-start;
+    align-items: flex-start;
+}
+
+#qitem{
+    display: flex;
+
+}
+
+#qitem a{
+    align-self:flex-end;
 }
 
 #queue img{
