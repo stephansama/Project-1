@@ -27,8 +27,12 @@
     const fadetime = 500
 
     // Google Chart options constant
-    const viewChartOptions = {title: 'View Count', pieSliceText: 'value', legend: {position: 'bottom'}}
-    const likeChartOptions = {title: 'Like Count', pieSliceText: 'value', legend: {position: 'bottom'}}
+    const viewChartOptions = {
+    title: 'View Count',
+        pieSliceText: 'value',
+        legend: {position: 'bottom'},
+    fontName: 'Ubuntu Mono'}
+    const likeChartOptions = {title: 'Like Count', pieSliceText: 'value',fontName: 'Ubuntu Mono', legend: {position: 'bottom'}}
 
     // DOM ELEMENTS
     const $input = $('input')
@@ -78,7 +82,6 @@
             this.likeCount = ajax_obj.statistics.likeCount
             this.favoriteCount = ajax_obj.statistics.favoriteCount
             this.commentCount = ajax_obj.statistics.commentCount
-            this.containsStats = true
         }
     }
 
@@ -306,6 +309,8 @@
 
         viewChartOptions.backgroundColor = Colors[2]
         likeChartOptions.backgroundColor = Colors[2]
+        viewChartOptions.colors = Colors
+        likeChartOptions.colors = Colors
 
         let viewChart = new google.visualization.PieChart($viewChart[0]);
         let likeChart = new google.visualization.PieChart($likeChart[0]);

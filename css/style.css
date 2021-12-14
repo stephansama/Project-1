@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap');
+
 /* USER DEFINED VARIABLES */
 :root{
     --main-color0: #F26601;
@@ -16,6 +18,7 @@ body, html{
     display: flex;
     flex-flow: column nowrap;
     overflow-x: hidden;
+    font-family: 'Ubuntu Mono', monospace;
 }
 
 a{
@@ -25,6 +28,7 @@ a{
 
 a:hover{
     color: blue;
+    transition: color 500ms;
 }
 
 h1{
@@ -43,7 +47,7 @@ table tr td:first-child{
     display: flex;
     flex-direction: row;
     width: 100%;
-    height: 35%;
+    height: 50%;
 }
 
 #view_chart, #like_chart{
@@ -57,10 +61,11 @@ table tr td:first-child{
     flex-flow: column;
     overflow: auto;
     height: 100%;
-    width: 40%;
+    width: 50%;
 }
 
 #qitem{
+    padding: 10px;
     display: flex;
     align-content: flex-start;
     flex-flow: row wrap;
@@ -68,8 +73,24 @@ table tr td:first-child{
     align-items: center;
 }
 
+#qitem:nth-child(1){
+    background-color: var(--main-color0);
+}
+#qitem:nth-child(2){
+    background-color: var(--main-color1);
+}
+#qitem:nth-child(3){
+    background-color: var(--main-color2);
+}
+#qitem:nth-child(4){
+    background-color: var(--main-color3);
+}
+#qitem:nth-child(5){
+    background-color: var(--main-color4);
+}
+
 #queue img{
-    width: 200px;
+    height: 100px;
 }
 
 #results{
