@@ -1,0 +1,95 @@
+/* USER DEFINED VARIABLES */
+:root{
+    --main-color0: #F26601;
+    --main-color1: #EB822E;
+    --main-color2: #D9DDC7;
+    --main-color3: #A2D4D0;
+    --main-color4: #66CBDF;
+}
+
+body, html{
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--main-color2);
+    display: flex;
+    flex-flow: column nowrap;
+    overflow-x: hidden;
+}
+
+a{
+    color: inherit;
+    text-decoration: none;
+}
+
+a:hover{
+    color: blue;
+}
+
+h1{
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    background-color: var(--main-color1);
+}
+
+table tr td:first-child{
+    text-align: right;
+    width: 20%;
+}
+
+#holder{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 35%;
+}
+
+#view_chart, #like_chart{
+    display: flex;
+    width: 30%;
+    height: 100%;
+}
+
+#queue{
+    display: flex;
+    flex-flow: column;
+    overflow: auto;
+    height: 100%;
+    width: 40%;
+}
+
+#qitem{
+    display: flex;
+    align-content: flex-start;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    align-items: center;
+}
+
+#queue img{
+    width: 200px;
+}
+
+#results{
+    display: flex;
+    justify-content: space-between;
+    height:200px;
+}
+
+#results img{
+    height:100%;
+}
+
+form{
+    display:flex;
+    justify-content: center;
+}
+
+form input[type=text]{
+    width: 40%;
+    height: 35px;
+    border: none;
+}
+
