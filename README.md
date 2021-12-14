@@ -2,7 +2,7 @@
 A web application that selects and compares data points between two videos
 
 ### Getting Started
-[Click Here]() to visit the deployed application
+[Click Here](https://brave-meninsky-79a382.netlify.app/) to visit the deployed application
 
 ### Technologies Used
 - HTML5 / CSS3
