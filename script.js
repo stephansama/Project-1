@@ -3,17 +3,11 @@
 // 12/10/21
 // =====================================
 //
-// Compare the number of letter occurrences
-// items[0]."statistics": {
-//         "viewCount": "8239664",
-//         "likeCount": "36646",
-//         "favoriteCount": "0",
-//         "commentCount": "716"
-//       }
 //
 // $(function () {
     // GLOBAL VARIABLES
-    const API = 'AIzaSyB9-3f8Dlx5-VOfcr_GCtocfwwMFSxwcq8'
+    // const API = 'AIzaSyB9-3f8Dlx5-VOfcr_GCtocfwwMFSxwcq8'
+    const API = 'AIzaSyANIJpTgj86KjrZvtD7NyHjfKPKgwxIu-U'
     const SEARCH_API_TEMPLATE = 'https://youtube.googleapis.com/youtube/v3/search?type=video&part=snippet&q=[QUERY]&key=[API]'
     const STATISTICS_API_TEMPLATE = 'https://www.googleapis.com/youtube/v3/videos?part=statistics&id=[ID]&key=[API]'
     const YTLINK_TEMPLATE = 'https://www.youtube.com/watch?v=[ID]'
@@ -28,14 +22,17 @@
 
     // Google Chart options constant
     const viewChartOptions = {
-    title: 'View Count',
+        title: 'View Count',
+        titleTextStyle: {fontSize:24},
         pieSliceText: 'value',
         legend: {position: 'bottom'},
-    fontName: 'Ubuntu Mono', chartArea: {left: 0}}
+        fontName: 'Ubuntu Mono',
+        chartArea: {left: 0},
+        is3d: true }
     const likeChartOptions = {title: 'Like Count', pieSliceText: 'value',fontName: 'Ubuntu Mono', legend: {position: 'bottom'}}
 
     // DOM ELEMENTS
-    const $input = $('input')
+    const $input = $('input[type=text]')
     const $queue = $('#queue')
     const $results = $('#results')
     const $viewChart = $('#view_chart')
@@ -47,8 +44,9 @@
     $results.on('click', 'img', selectVideo)
     $queue.on('click', 'button', removeFromQueue)
     $queue.on('click', 'img', showTable)
-    $(window).resize(function () {
-        drawGoogleCharts()
+    $(window).resize(function () { drawGoogleCharts() })
+    $('body').keypress(function (k) {
+        $input[0].focus()
     })
     
     $(document).ready(function () {
@@ -58,10 +56,10 @@
             style = style.replaceAll(' ', '')
             Colors.push(style)
         }
+        // initial statements
+        initApplication()
     })
 
-    // initial statements
-    initApplication()
 
     // manage incoming ajax data into a combined data type
     class YVid {
@@ -89,11 +87,10 @@
         // Load the Visualization API and the corechart package.
         google.charts.load('current', {'packages': ['corechart']});
 
-        loadWindowMemory()
-
         // Set a callback to run when the Google Visualization API is loaded.
         google.charts.setOnLoadCallback(drawGoogleCharts);
 
+        loadWindowMemory()
     }
 
     /** GENERATOR FUNCTIONS **/
@@ -152,7 +149,6 @@
     // load api data into local result array
     function loadResultsFromAJAX(data) {
         let i = 0;
-
         data.forEach(elem => {
             let t = new YVid(elem, i++)
             result_videos.push(t)
@@ -165,7 +161,14 @@
     }
 
     function loadWindowMemory() {
-
+        let json = window.localStorage.getItem('yt')
+        if(json !== null)
+            queue_videos = JSON.parse(json)
+    }
+    
+    function updateLocalStorage() {
+        window.localStorage.setItem('yt', JSON.stringify(queue_videos))
+        console.log(window.localStorage)
     }
 
     /** EVENT FUNCTIONS **/
@@ -201,6 +204,7 @@
         t.fadeOut(fadetime, function () {
             t.remove()
             queue_videos.splice(parseInt(t[0].className), 1)
+
             console.log(queue_videos)
             shuffleQueueClasses()
             drawGoogleCharts()
@@ -226,6 +230,7 @@
 
     function handleError(error) {
         console.log(error)
+        alert('Sorry an error occurred')
     }
 
     /** RENDERING FUNCTIONS **/
@@ -252,6 +257,7 @@
         $.ajax(createStatisticsAPILink(YObj.vid)).then(function (data) {
             YObj.addStats(data.items[0])
             queue_videos.push(YObj)
+            updateLocalStorage()
             drawGoogleCharts()
 
             let $qu = $('<div id="qitem">')
@@ -262,7 +268,7 @@
             renderResultThumbnail(YObj, $qu)
 
             $qu.append($(`<a href="${createYTLink(YObj.vid)}" target="_blank">`)
-                .text(`${YObj.title.slice(0, 35)}...`))
+                .text(`${YObj.title.slice(0, 35)} ->`))
                 .append(createInfo(YObj))
 
             $queue.append($qu)
@@ -280,10 +286,7 @@
     function queueViewDataTable() {
 
         // add all the titles
-        let title = ['Title', 'Views']
-
-        let data = []
-        data.push(title)
+        let data = [['Title', 'Views']]
 
         queue_videos.forEach(elem => {
             data.push([`${elem.title}`, parseInt(elem.viewCount)])
