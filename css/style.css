@@ -38,9 +38,15 @@ h1{
     background-color: var(--main-color1);
 }
 
+table{
+    background-color: var(--main-color2);
+}
+
 table tr td:first-child{
     text-align: right;
     width: 20%;
+    padding-right: 5px;
+    border-right: 2px solid black;
 }
 
 #holder{

@@ -31,7 +31,7 @@
     title: 'View Count',
         pieSliceText: 'value',
         legend: {position: 'bottom'},
-    fontName: 'Ubuntu Mono'}
+    fontName: 'Ubuntu Mono', chartArea: {left: 0}}
     const likeChartOptions = {title: 'Like Count', pieSliceText: 'value',fontName: 'Ubuntu Mono', legend: {position: 'bottom'}}
 
     // DOM ELEMENTS
@@ -121,27 +121,27 @@
         let $t = $(`<table style="display: ${hidden ? 'none':'block'};">`)
         $t.html(`
         <tr>
-        <td>Channel:</td>
+        <td>Channel</td>
         <td><a href="${createYTChannel(YObj.channelId)}" target="_blank">${YObj.channelTitle}</a></td>
         </tr>
         <tr>
-        <td>Title:</td>
+        <td>Title</td>
         <td><a href="${createYTLink(YObj.vid)}" target="_blank">${YObj.title}</a></td>
         </tr>
         <tr>
-        <td>Published:</td>
+        <td>Published</td>
         <td>${YObj.publishTime}</td>
         </tr>
         <tr>
-        <td>Description:</td>
+        <td>Description</td>
         <td>${YObj.description}</td>
         </tr>
         <tr>
-        <td>Views:</td>
+        <td>Views</td>
         <td>${YObj.viewCount}</td>
         </tr>
         <tr>
-        <td>Likes:</td>
+        <td>Likes</td>
         <td>${YObj.likeCount}</td>
         </tr>
         `).addClass(hidden ? 'hide': 'show')
@@ -201,6 +201,7 @@
         t.fadeOut(fadetime, function () {
             t.remove()
             queue_videos.splice(parseInt(t[0].className), 1)
+            console.log(queue_videos)
             shuffleQueueClasses()
             drawGoogleCharts()
         })
@@ -261,7 +262,7 @@
             renderResultThumbnail(YObj, $qu)
 
             $qu.append($(`<a href="${createYTLink(YObj.vid)}" target="_blank">`)
-                .text('>'))
+                .text(`${YObj.title.slice(0, 35)}...`))
                 .append(createInfo(YObj))
 
             $queue.append($qu)
