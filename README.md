@@ -6,10 +6,10 @@ A web application that selects and compares data points between two videos
 
 ### Technologies Used
 - HTML5 / CSS3
-- Google Fonts
-- Javascript / jQuery
-- Chart.js / Google Charts
-- YouTube Data API
+- [Google Fonts](https://fonts.google.com/specimen/Ubuntu)
+- Javascript / [jQuery](https://jquery.com/)
+- [Google Charts](https://developers.google.com/chart)
+- [YouTube Data API](https://developers.google.com/youtube/v3)
 
 ### Screenshots
 ###### Whiteboard Drawing
