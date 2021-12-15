@@ -6,8 +6,8 @@
 //
 $(function () {
     // GLOBAL VARIABLES
-    // const API = 'AIzaSyB9-3f8Dlx5-VOfcr_GCtocfwwMFSxwcq8'
-    const API = 'AIzaSyANIJpTgj86KjrZvtD7NyHjfKPKgwxIu-U'
+    const API = 'AIzaSyB9-3f8Dlx5-VOfcr_GCtocfwwMFSxwcq8'
+    // const API = 'AIzaSyANIJpTgj86KjrZvtD7NyHjfKPKgwxIu-U'
     const SEARCH_API_TEMPLATE = 'https://youtube.googleapis.com/youtube/v3/search?type=video&part=snippet&q=[QUERY]&key=[API]'
     const STATISTICS_API_TEMPLATE = 'https://www.googleapis.com/youtube/v3/videos?part=statistics&id=[ID]&key=[API]'
     const YTLINK_TEMPLATE = 'https://www.youtube.com/watch?v=[ID]'
@@ -65,7 +65,7 @@ $(function () {
                 chartOptions.backgroundColor = style
         }
         let istyle = $('<style>')
-        let template = '#qitem:nth-child([n]){background-color: [val];\n}'
+        let template = '#qitem:nth-child([n]){background-color: [val];}\n'
         let istylehtml = ''
         for (let i = 0; i < chartOptions.colors.length; ++i) {
             let t = template.replace('[n]', `${i + 1}`);

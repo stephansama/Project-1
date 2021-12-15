@@ -14,9 +14,11 @@ A web application that selects and compares data points between two videos
 ### Screenshots
 ###### Whiteboard Drawing
 ![image](assets/drawing.jpg)
+###### Deployed Application
+![image](assets/deployed.jpg)
 
 ### TO-DO:
-- search for a YouTube video
-- select one of the predetermined metrics
-- display chart comparing the two datasets
-
+- add API switching functionality
+- style for mobile
+- add clear button to clear all items
+- add download button for statistics
