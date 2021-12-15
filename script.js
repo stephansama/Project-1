@@ -16,20 +16,19 @@
     let result_videos = []
     let queue_videos = []
     let gStyle
-    let Colors = []
 
     const fadetime = 500
 
     // Google Chart options constant
-    const viewChartOptions = {
+    const chartOptions = {
         title: 'View Count',
-        titleTextStyle: {fontSize:24},
         pieSliceText: 'value',
-        legend: {position: 'bottom'},
         fontName: 'Ubuntu Mono',
         chartArea: {left: 0},
-        is3d: true }
-    const likeChartOptions = {title: 'Like Count', pieSliceText: 'value',fontName: 'Ubuntu Mono', legend: {position: 'bottom'}}
+        titleTextStyle: {fontSize: 24},
+        legend: {position: 'bottom'},
+        is3d: true
+    }
 
     // DOM ELEMENTS
     const $input = $('input[type=text]')
@@ -40,22 +39,41 @@
     const $submit = $('button[type=submit]')
 
     // LISTENER EVENTS
-    $submit.on('click', submitSearch)
-    $results.on('click', 'img', selectVideo)
-    $queue.on('click', 'button', removeFromQueue)
+    $submit.on('click', handleSubmitSearch)
+    $results.on('click', 'img', handleSelectVideo)
+    $queue.on('click', 'button', handleRemoveFromQueue)
     $queue.on('click', 'img', showTable)
     $(window).resize(function () { drawGoogleCharts() })
     $('body').keypress(function (k) {
-        $input[0].focus()
+        $input[0].focus()  // focus text field
     })
-    
+
+    // window load
     $(document).ready(function () {
+
+        // load global style
         gStyle = getComputedStyle(document.documentElement)
+        chartOptions.colors = []
         for(let i =0; i < 5; ++i) {
             let style = gStyle.getPropertyValue(`--main-color${i}`)
             style = style.replaceAll(' ', '')
-            Colors.push(style)
+            if(i < 4)
+                chartOptions.colors.push(style)
+            if(i === 4)
+                chartOptions.backgroundColor = style
         }
+        let istyle = $('<style>')
+        let template = '#qitem:nth-child([n]){background-color: [val];\n}'
+        let istylehtml = ''
+        for (let i = 0; i < chartOptions.colors.length; ++i){
+            let t = template.replace('[n]', `${i+1}`);
+            t = t.replace('[val]', chartOptions.colors[i])
+            istylehtml += t
+        }
+
+        istyle.html(istylehtml)
+        $('head').append(istyle)
+
         // initial statements
         initApplication()
     })
@@ -83,6 +101,7 @@
         }
     }
 
+    /** INITIAL LOADING **/
     function initApplication() {
         // Load the Visualization API and the corechart package.
         google.charts.load('current', {'packages': ['corechart']});
@@ -133,6 +152,7 @@
         <td>Description</td>
         <td>${YObj.description}</td>
         </tr>
+        ${YObj.viewCount !== undefined ? `
         <tr>
         <td>Views</td>
         <td>${YObj.viewCount}</td>
@@ -140,19 +160,22 @@
         <tr>
         <td>Likes</td>
         <td>${YObj.likeCount}</td>
-        </tr>
+        </tr>` : ''
+        }
         `).addClass(hidden ? 'hide': 'show')
         return $t
     }
 
     /** INTERNAL SPACE MANAGEMENT **/
-    // load api data into local result array
-    function loadResultsFromAJAX(data) {
+    function loadResults(data) {
+        if($results.html() !== null)
+            clearResults()
         let i = 0;
-        data.forEach(elem => {
+        data.items.forEach(elem => {
             let t = new YVid(elem, i++)
             result_videos.push(t)
         })
+        renderAllResults()
     }
 
     function clearResults() {
@@ -160,34 +183,41 @@
         result_videos = []
     }
 
+    /** WINDOW MEMORY **/
     function loadWindowMemory() {
         let json = window.localStorage.getItem('yt')
         if(json !== null)
             queue_videos = JSON.parse(json)
+        queue_videos.forEach(elem => {
+            renderQueueItem(elem)
+        })
     }
-    
+
     function updateLocalStorage() {
         window.localStorage.setItem('yt', JSON.stringify(queue_videos))
-        console.log(window.localStorage)
     }
 
     /** EVENT FUNCTIONS **/
-    function submitSearch(evt) {
+    function handleSubmitSearch(evt) {
         evt.preventDefault()
 
         let ival = $input.val()
-        if (ival === 'test') {
+        if(ival === ''){
+            $results.html('<span>Need to insert valid input...</span>')
+            return
+        } if (ival === '`test') {
             $.getJSON('./assets/search.json', loadResults)
             $input.val('')
             return
         }
+
 
         $.ajax(createSearchAPILink($input.val())).then(loadResults, handleError)
 
         $input.val('')
     }
 
-    function selectVideo(evt) {
+    function handleSelectVideo(evt) {
         evt.preventDefault()
 
         let kept = result_videos[parseInt(evt.target.className)]
@@ -197,18 +227,24 @@
         clearResults()
     }
 
-    function removeFromQueue(evt) {
+    function handleRemoveFromQueue(evt) {
         evt.preventDefault()
 
         let t = $(evt.target.parentNode)
+        console.log(t)
         t.fadeOut(fadetime, function () {
             t.remove()
             queue_videos.splice(parseInt(t[0].className), 1)
-
             console.log(queue_videos)
             shuffleQueueClasses()
             drawGoogleCharts()
+            updateLocalStorage()
         })
+    }
+
+    function handleError(error) {
+        console.log(error)
+        alert('Sorry an error occurred')
     }
 
     function shuffleQueueClasses() {
@@ -228,27 +264,43 @@
         }
     }
 
-    function handleError(error) {
-        console.log(error)
-        alert('Sorry an error occurred')
-    }
-
     /** RENDERING FUNCTIONS **/
 
-    function loadResults(data) {
-        loadResultsFromAJAX(data.items)
-        renderResultThumbnails()
-    }
-
-    function renderResultThumbnail(YObj, elem = $results) {
+    // RESULT
+    function renderThumbnail(YObj, elem) {
         let thumbnail = $(`<img alt="${YObj.title}" src="${YObj.thumbnailUrl}">`)
             .addClass(`${YObj.idx}`)
         elem.append(thumbnail)
     }
 
-    function renderResultThumbnails() {
+    
+    function renderResult(YObj) {
+        let $ru = $('<div id="ritem">')
+            .addClass(`${YObj.idx}`)
+        renderThumbnail(YObj, $ru)
+        $ru.append(createInfo(YObj,false))
+        $results.append($ru)
+    }
+    
+    function renderAllResults() {
         for (let i = 0; i < result_videos.length; i++)
-            renderResultThumbnail(result_videos[i])
+            renderResult(result_videos[i])
+    }
+
+    // QUEUE
+    function renderQueueItem(YObj) {
+            let $qu = $('<div id="qitem">')
+                .append($('<button>')
+                    .text('X'))
+                .addClass(`${YObj.idx}`)
+
+            renderThumbnail(YObj, $qu)
+
+            $qu.append($(`<a href="${createYTLink(YObj.vid)}" target="_blank">`)
+                .text(`${YObj.title.slice(0, 35)} ->`))
+                .append(createInfo(YObj))
+
+            $queue.append($qu)
     }
 
     function renderQueue(YObj) {
@@ -259,21 +311,11 @@
             queue_videos.push(YObj)
             updateLocalStorage()
             drawGoogleCharts()
-
-            let $qu = $('<div id="qitem">')
-                .append($('<button>')
-                    .text('X'))
-                .addClass(`${YObj.idx}`)
-
-            renderResultThumbnail(YObj, $qu)
-
-            $qu.append($(`<a href="${createYTLink(YObj.vid)}" target="_blank">`)
-                .text(`${YObj.title.slice(0, 35)} ->`))
-                .append(createInfo(YObj))
-
-            $queue.append($qu)
+            renderQueueItem(YObj)
         }, handleError)
     }
+
+    /** GOOGLE CHART FUNCTIONS **/
 
     function initData() {
         let data = [['Title', 'Views']]
@@ -283,43 +325,26 @@
         return google.visualization.arrayToDataTable(data)
     }
 
-    function queueViewDataTable() {
-
-        // add all the titles
-        let data = [['Title', 'Views']]
-
-        queue_videos.forEach(elem => {
-            data.push([`${elem.title}`, parseInt(elem.viewCount)])
+    function createDataTable(name, data) {
+        let rdata = [['Title', name]]
+        data.forEach(elem => {
+            rdata.push([elem[0], elem[1]])
         })
-
-        return google.visualization.arrayToDataTable(data)
-    }
-
-    function queueLikeDataTable() {
-        let title = ['Title', 'Likes']
-        let data = []
-        data.push(title)
-
-        queue_videos.forEach(elem => {
-            data.push([`${elem.title}`, parseInt(elem.likeCount)])
-        })
-
-        return google.visualization.arrayToDataTable(data)
+        return google.visualization.arrayToDataTable(rdata)
     }
 
     function drawGoogleCharts() {
-        let view_data = queue_videos.length === 0 ? initData() : queueViewDataTable()
-        let like_data = queue_videos.length === 0 ? initData() : queueLikeDataTable()
+        // VIEW COUNT
+        let data = queue_videos.length === 0 ? initData() : createDataTable('View', queue_videos.map(elem => {return [elem.title, parseInt(elem.viewCount)]}))
+        let chart = new google.visualization.PieChart($viewChart[0]);
+        chart.draw(data, chartOptions);
 
-        viewChartOptions.backgroundColor = Colors[2]
-        likeChartOptions.backgroundColor = Colors[2]
-        viewChartOptions.colors = Colors
-        likeChartOptions.colors = Colors
+        // LIKE COUNT
+        data = queue_videos.length === 0 ? initData() : createDataTable('Like', queue_videos.map(elem => {return [elem.title, parseInt(elem.likeCount)]}))
+        chart = new google.visualization.PieChart($likeChart[0]);
+        chartOptions.title = 'Like Count'
+        chart.draw(data, chartOptions);
 
-        let viewChart = new google.visualization.PieChart($viewChart[0]);
-        let likeChart = new google.visualization.PieChart($likeChart[0]);
-
-        viewChart.draw(view_data, viewChartOptions);
-        likeChart.draw(like_data, likeChartOptions);
+        chartOptions.title = 'View Count'  // rename title to view count
     }
 // })

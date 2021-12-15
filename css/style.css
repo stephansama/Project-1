@@ -4,9 +4,9 @@
 :root{
     --main-color0: #F26601;
     --main-color1: #EB822E;
-    --main-color2: #D9DDC7;
-    --main-color3: #A2D4D0;
-    --main-color4: #66CBDF;
+    --main-color2: #A2D4D0;
+    --main-color3: #66CBDF;
+    --main-color4: #D9DDC7;
 }
 
 body, html{
@@ -14,7 +14,9 @@ body, html{
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: var(--main-color2);
+    background-color: var(--main-color4);
+    position: relative;
+    min-height: 100vh;
     display: flex;
     flex-flow: column nowrap;
     overflow-x: hidden;
@@ -39,7 +41,8 @@ h1{
 }
 
 table{
-    background-color: var(--main-color2);
+    background-color: var(--main-color4);
+    width:100%;
 }
 
 table tr td:first-child{
@@ -75,48 +78,84 @@ table tr td:first-child{
     display: flex;
     align-content: flex-start;
     flex-flow: row wrap;
-    justify-content: space-around;
+    justify-content: flex-start;
     align-items: center;
 }
 
-#qitem:nth-child(1){
-    background-color: var(--main-color0);
-}
-#qitem:nth-child(2){
-    background-color: var(--main-color1);
-}
-#qitem:nth-child(3){
-    background-color: var(--main-color2);
-}
-#qitem:nth-child(4){
-    background-color: var(--main-color3);
-}
-#qitem:nth-child(5){
-    background-color: var(--main-color4);
+#qitem img{
+    height: 100px;
+    margin: 5px 50px;
 }
 
-#queue img{
-    height: 100px;
+#qitem button{
+    background-color: var(--main-color4);
+    border: none;
+    padding: 15px;
+    margin-left:15px;
 }
 
 #results{
     display: flex;
-    justify-content: space-between;
+    flex-flow: row nowrap;
+    justify-content: space-around;
     height:200px;
 }
 
+#results span{
+    align-self: center;
+    justify-content: center;
+    text-align: center;
+}
+
 #results img{
-    height:100%;
+    height: 100px;
 }
 
 form{
+    padding:15px;
     display:flex;
     justify-content: center;
+}
+
+form button[type=submit]{
+    background-color: var(--main-color3);
+    border:none;
 }
 
 form input[type=text]{
     width: 40%;
     height: 35px;
     border: none;
+}
+
+footer{
+    background-color: var(--main-color3);
+    align-content: flex-end;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    padding-bottom: 15px;
+    bottom: 0;
+    width: 100%;
+    height: 2.5rem;
+}
+
+footer img{
+    width: 25px;
+}
+
+footer img.li{
+    width: 30px;
+}
+
+footer ul{
+    list-style-type: none;
+    display: flex;
+    align-content: center;
+}
+
+footer ul li{
+    display: inline-block;
+    margin: 0 50px;
 }
 
