@@ -120,11 +120,12 @@ form{
 form button[type=submit]{
     background-color: var(--main-color3);
     border:none;
+    height:100%;
 }
 
 form input[type=text]{
-    width: 40%;
     height: 35px;
+    width: 40%;
     border: none;
 }
 
