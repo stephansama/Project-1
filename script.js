@@ -322,7 +322,7 @@ $(function () {
     }
 
     function renderAllResults() {
-        result_videos.forEach(elem => {renderResult(elem)})
+        result_videos.forEach(elem => { renderResult(elem) })
     }
 
     // CLEAR BUTTON
@@ -382,7 +382,7 @@ $(function () {
         let data, chart
 
         // VIEW COUNT
-        gchartOptions.title = 'View Count'
+        gchartOptions.title = 'Views'
         data = queue_videos.length === 0 ? initData() :
             createDataTable('View', queue_videos.map(elem => {
                 return [elem.title, parseInt(elem.viewCount)] }))
@@ -391,7 +391,7 @@ $(function () {
         chart.draw(data, gchartOptions);
 
         // LIKE COUNT
-        gchartOptions.title = 'Like Count'
+        gchartOptions.title = 'Likes'
         data = queue_videos.length === 0 ? initData() :
             createDataTable('Like', queue_videos.map(elem => {
                 return [elem.title, parseInt(elem.likeCount)] }))
