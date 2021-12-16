@@ -1,47 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata&display=swap');
-/* UBUNTU */
-/* @import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap'); */
-
-/* USER DEFINED VARIABLES */
-:root {
-    --main-color0: #F26601;
-    --main-color1: #EB822E;
-    --main-color2: #A2D4D0;
-    --main-color3: #66CBDF;
-    --main-color4: #D9DDC7;
-}
-
-body, html {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    min-height: 100vh;
-    display: flex;
-    flex-flow: column nowrap;
-    overflow-x: hidden;
-    position: relative;
-    font-family: 'Inconsolata', monospace;
-    background-color: var(--main-color4);
-}
-
-a {
-    color: inherit;
-    text-decoration: none;
-}
-
-a:hover {
-    text-shadow: 0 10px 5px white;
-    transition: text-shadow 500ms;
-}
+@import "main.css";
+@import "results.css";
+@import "footer.css";
+@import "queue.css";
 
 h1 {
     margin: 0;
     padding: 10px;
     text-align: center;
-    background-color: var(--main-color1);
+    background-color: var(--main-color0);
 }
 
+/* Youtube Information Table */
 table {
     background-color: var(--main-color4);
     width: 100%;
@@ -54,76 +23,13 @@ table tr td:first-child {
     border-right: 2px solid black;
 }
 
-table tr td a {
-
-}
-
 table tr td a:hover {
     color: var(--main-color0);
     transition: color 500ms;
     text-shadow: none;
 }
 
-#holder {
-    display: flex;
-    padding-left: 15px;
-    flex-direction: row;
-    width: 100%;
-    height: 50%;
-}
-
-#view_chart, #like_chart {
-    display: flex;
-    width: 30%;
-    height: 100%;
-}
-
-#queue {
-    display: flex;
-    flex-flow: column;
-    overflow: auto;
-    height: 100%;
-    width: 50%;
-}
-
-#qitem {
-    padding: 10px;
-    display: flex;
-    align-content: flex-start;
-    flex-flow: row wrap;
-    justify-content: flex-start;
-    align-items: center;
-}
-
-#qitem img {
-    height: 100px;
-    margin: 5px 50px;
-}
-
-#qitem button {
-    background-color: var(--main-color4);
-    border: none;
-    padding: 15px;
-    margin-left: 15px;
-}
-
-#results {
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: space-around;
-    height: 200px;
-}
-
-#results span {
-    align-self: center;
-    justify-content: center;
-    text-align: center;
-}
-
-#results img {
-    height: 100px;
-}
-
+/* Text Input Field */
 form {
     padding: 15px;
     display: flex;
@@ -146,35 +52,3 @@ form input[type=text] {
 form input[type=text]:focus {
     outline: none;
 }
-
-footer {
-    background-color: var(--main-color3);
-    align-content: flex-end;
-    display: flex;
-    justify-content: center;
-    position: absolute;
-    padding-bottom: 15px;
-    bottom: 0;
-    width: 100%;
-    height: 2.5rem;
-}
-
-footer img {
-    width: 25px;
-}
-
-footer img.li {
-    width: 30px;
-}
-
-footer ul {
-    list-style-type: none;
-    display: flex;
-    align-content: center;
-}
-
-footer ul li {
-    display: inline-block;
-    margin: 0 50px;
-}
-

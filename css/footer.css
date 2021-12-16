@@ -1,0 +1,32 @@
+@import "main.css";
+
+footer {
+    width: 100%;
+    height: 2.5rem;
+    bottom: 0;
+    padding-bottom: 15px;
+    display: flex;
+    position: absolute;
+    align-content: flex-end;
+    justify-content: center;
+    background-color: var(--main-color3);
+}
+
+footer img {
+    width: 25px;
+}
+
+footer img.li {
+    width: 30px;
+}
+
+footer ul {
+    display: flex;
+    align-content: center;
+    list-style-type: none;
+}
+
+footer ul li {
+    margin: 0 50px;
+    display: inline-block;
+}
