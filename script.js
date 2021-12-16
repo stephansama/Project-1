@@ -3,6 +3,14 @@
 // 12/10/21
 // =====================================
 //
+// Accept user input inside a text field
+// Submit query to YouTube Data API
+// retrieve 5 possible YouTube videos
+// upon a result video selection add it to local queue
+// load google chart with local queue data
+// update local queue to the window storage for persistence
+// clear button to fade out and remove all queue item elements
+// download button to download unnamed json file containing all the YouTube data
 //
 $(function () {
     /** GLOBAL VARIABLES **/
@@ -35,10 +43,10 @@ $(function () {
     /** DOM ELEMENTS **/
     const $input = $('input[type=text]')
     const $queue = $('#queue')
+    const $submit = $('button[type=submit]')
     const $results = $('#results')
     const $viewChart = $('#view_chart')
     const $likeChart = $('#like_chart')
-    const $submit = $('button[type=submit]')
 
     /** LISTENER EVENTS **/
 
@@ -62,7 +70,6 @@ $(function () {
         // initial statements
         initApplication()
     })
-
 
     // manage incoming ajax data into a combined data type
     class YVid {
@@ -169,10 +176,8 @@ $(function () {
         for (let i = 0; i < 5; ++i) {
             let style = gStyle.getPropertyValue(`--main-color${i}`)
             style = style.replaceAll(' ', '')
-            if (i < 4)
-                gchartOptions.colors.push(style)
-            if (i === 4)
-                gchartOptions.backgroundColor = style
+            if (i < 4) gchartOptions.colors.push(style)
+            if (i === 4) gchartOptions.backgroundColor = style
         }
     }
 
@@ -219,24 +224,19 @@ $(function () {
         evt.preventDefault()
 
         let ival = $input.val()
-
         if (ival === '')
             $results.html('<span>Need to insert valid input...</span>')
         else if (ival === '`test')
             $.getJSON('./assets/search.json', loadResults)
         else
             $.ajax(createAPILink($input.val())).then(loadResults, handleError)
-
         $input.val('')
     }
 
     function handleSelectVideo(evt) {
         evt.preventDefault()
-
         let kept = result_videos[parseInt(evt.target.className)]
-
         renderQueue(kept)
-
         clearResults()
     }
 
