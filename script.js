@@ -4,7 +4,7 @@
 // =====================================
 //
 //
-// $(function () {
+$(function () {
     /** GLOBAL VARIABLES **/
     // YouTube Data API Key
     const API = 'AIzaSyB9-3f8Dlx5-VOfcr_GCtocfwwMFSxwcq8'
@@ -25,7 +25,6 @@
 
     // Google Chart options
     const gchartOptions = {
-        title: 'View Count',
         pieSliceText: 'value',
         fontName: 'Inconsolata',
         chartArea: {left: 0},
@@ -46,7 +45,6 @@
     // DOM listener events
     $results.on('click', 'img', handleSelectVideo)
     $submit.on('click', handleSubmitSearch)
-
     $queue.on('click', 'button#close', handleRemoveFromQueue)
     $queue.on('click', 'button#clear', handleClearButton)
     $queue.on('click', 'button#dwn', handleDownloadButton)
@@ -54,7 +52,7 @@
 
     // window state change events
     $(window).resize(function () { drawGoogleCharts() })
-    $('body').keypress(function (k) { $input[0].focus() })
+    $('body').keypress(function () { $input[0].focus() })
 
     // window load
     $(document).ready(function () {
@@ -206,9 +204,10 @@
     /** WINDOW MEMORY **/
     function loadWindowMemory() {
         let json = window.localStorage.getItem('yt')
-        if (json !== null)
+        if (json !== null) {
             queue_videos = JSON.parse(json)
-        queue_videos.forEach(elem => renderQueueItem(elem))
+            queue_videos.forEach(elem => renderQueueItem(elem))
+        }
     }
 
     function updateLocalStorage() {
@@ -400,4 +399,4 @@
 
         chart.draw(data, gchartOptions);
     }
-// })
+})
