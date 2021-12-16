@@ -15,7 +15,7 @@ A web application that selects and compares data points between two videos
 ###### Whiteboard Drawing
 ![image](assets/drawing.jpg)
 ###### Deployed Application
-![image](assets/deployed.jpg)
+![image](assets/deployed.png)
 
 ### TO-DO:
 - add API switching functionality
