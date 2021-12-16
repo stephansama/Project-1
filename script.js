@@ -4,33 +4,36 @@
 // =====================================
 //
 //
-$(function () {
-    // GLOBAL VARIABLES
+// $(function () {
+    /** GLOBAL VARIABLES **/
+    // YouTube Data API Key
     const API = 'AIzaSyB9-3f8Dlx5-VOfcr_GCtocfwwMFSxwcq8'
     // const API = 'AIzaSyANIJpTgj86KjrZvtD7NyHjfKPKgwxIu-U'
+
+    // Template strings
     const SEARCH_API_TEMPLATE = 'https://youtube.googleapis.com/youtube/v3/search?type=video&part=snippet&q=[QUERY]&key=[API]'
-    const STATISTICS_API_TEMPLATE = 'https://www.googleapis.com/youtube/v3/videos?part=statistics&id=[ID]&key=[API]'
+    const STATISTICS_API_TEMPLATE = 'https://www.googleapis.com/youtube/v3/videos?part=statistics&id=[QUERY]&key=[API]'
     const YTLINK_TEMPLATE = 'https://www.youtube.com/watch?v=[ID]'
     const YTCHANNEL_TEMPLATE = 'https://www.youtube.com/channel/[ID]'
 
+    // Internal video object storage
     let result_videos = []
     let queue_videos = []
-    let gStyle
 
+    // Global jQuery fade time
     const fadetime = 500
 
-    // Google Chart options constant
-    const chartOptions = {
+    // Google Chart options
+    const gchartOptions = {
         title: 'View Count',
         pieSliceText: 'value',
         fontName: 'Inconsolata',
         chartArea: {left: 0},
         titleTextStyle: {fontSize: 24},
-        legend: {position: 'bottom'},
-        is3d: true
+        legend: {position: 'bottom'}
     }
 
-    // DOM ELEMENTS
+    /** DOM ELEMENTS **/
     const $input = $('input[type=text]')
     const $queue = $('#queue')
     const $results = $('#results')
@@ -38,44 +41,26 @@ $(function () {
     const $likeChart = $('#like_chart')
     const $submit = $('button[type=submit]')
 
-    // LISTENER EVENTS
-    $submit.on('click', handleSubmitSearch)
+    /** LISTENER EVENTS **/
+
+    // DOM listener events
     $results.on('click', 'img', handleSelectVideo)
-    $queue.on('click', 'button', handleRemoveFromQueue)
+    $submit.on('click', handleSubmitSearch)
+
+    $queue.on('click', 'button#close', handleRemoveFromQueue)
+    $queue.on('click', 'button#clear', handleClearButton)
+    $queue.on('click', 'button#dwn', handleDownloadButton)
     $queue.on('click', 'img', showTable)
-    $(window).resize(function () {
-        drawGoogleCharts()
-    })
-    $('body').keypress(function (k) {
-        $input[0].focus()  // focus text field
-    })
+
+    // window state change events
+    $(window).resize(function () { drawGoogleCharts() })
+    $('body').keypress(function (k) { $input[0].focus() })
 
     // window load
     $(document).ready(function () {
-
-        // load global style
-        gStyle = getComputedStyle(document.documentElement)
-        chartOptions.colors = []
-        for (let i = 0; i < 5; ++i) {
-            let style = gStyle.getPropertyValue(`--main-color${i}`)
-            style = style.replaceAll(' ', '')
-            if (i < 4)
-                chartOptions.colors.push(style)
-            if (i === 4)
-                chartOptions.backgroundColor = style
-        }
-        let istyle = $('<style>')
-        let template = '#qitem:nth-child([n]){background-color: [val];}\n'
-        let istylehtml = ''
-        for (let i = 0; i < chartOptions.colors.length; ++i) {
-            let t = template.replace('[n]', `${i + 1}`);
-            t = t.replace('[val]', chartOptions.colors[i])
-            istylehtml += t
-        }
-
-        istyle.html(istylehtml)
-        $('head').append(istyle)
-
+        // load global style & apply it to queue items
+        extractColors()
+        createQueueStyles()
         // initial statements
         initApplication()
     })
@@ -88,7 +73,6 @@ $(function () {
             this.vid = ajax_obj.id.videoId
             this.title = ajax_obj.snippet.title
             this.channelId = ajax_obj.snippet.channelId
-            this.publishedAt = ajax_obj.snippet.publishedAt
             this.publishTime = ajax_obj.snippet.publishTime
             this.description = ajax_obj.snippet.description
             this.channelTitle = ajax_obj.snippet.channelTitle
@@ -105,7 +89,7 @@ $(function () {
 
     /** INITIAL LOADING **/
     function initApplication() {
-        // Load the Visualization API and the corechart package.
+        // Load the Visualization API and the core chart package.
         google.charts.load('current', {'packages': ['corechart']});
 
         // Set a callback to run when the Google Visualization API is loaded.
@@ -115,14 +99,8 @@ $(function () {
     }
 
     /** GENERATOR FUNCTIONS **/
-    function createSearchAPILink(query) {
-        let t = SEARCH_API_TEMPLATE.replace('[QUERY]', query)
-        t = t.replace('[API]', API)
-        return t
-    }
-
-    function createStatisticsAPILink(id) {
-        let t = STATISTICS_API_TEMPLATE.replace('[ID]', id)
+    function createAPILink(id, template = SEARCH_API_TEMPLATE) {
+        let t = template.replace('[QUERY]', id)
         t = t.replace('[API]', API)
         return t
     }
@@ -131,16 +109,13 @@ $(function () {
         return template.replace('[ID]', videoId)
     }
 
-    function createYTChannel(id) {
-        return YTCHANNEL_TEMPLATE.replace('[ID]', id)
-    }
-
+    // create table to hold YT data information
     function createInfo(YObj, hidden = true) {
         let $t = $(`<table style="display: ${hidden ? 'none' : 'block'};">`)
         $t.html(`
         <tr>
         <td>Channel</td>
-        <td><a href="${createYTChannel(YObj.channelId)}" target="_blank">${YObj.channelTitle}</a></td>
+        <td><a href="${createYTLink(YObj.channelId, YTCHANNEL_TEMPLATE)}" target="_blank">${YObj.channelTitle}</a></td>
         </tr>
         <tr>
         <td>Title</td>
@@ -154,7 +129,7 @@ $(function () {
         <td>Description</td>
         <td>${YObj.description}</td>
         </tr>
-        ${YObj.viewCount !== undefined ? // only add viewCount if updated
+        ${YObj.viewCount !== undefined ? // only add viewCount if it is updated
         `<tr>
         <td>Views</td>
         <td>${YObj.viewCount}</td>
@@ -165,6 +140,42 @@ $(function () {
         </tr>` : ''}`)
             .addClass(hidden ? 'hide' : 'show')
         return $t
+    }
+
+    /** Global Styling **/
+    // apply Google Chart Colors to the queue items
+    function createQueueStyles(repetitions = 4) {
+        let istyle = $('<style>')
+        let template = '#qitem:nth-child([n]){background-color: [val];}\n'
+        let istylehtml = ''
+        let index = 1  // compensate for clear and button area
+
+        // iterate through the number of repetitions
+        for (let i = 0; i < repetitions; i++) {
+            // go through all the available colors
+            for (let k = 0; k < gchartOptions.colors.length; ++k) {
+                let t = template.replace('[n]', `${index++ + 1}`);
+                t = t.replace('[val]', gchartOptions.colors[k])
+                istylehtml += t
+            }
+        }
+
+        istyle.html(istylehtml)
+        $('head').append(istyle)
+    }
+
+    // extract all colors from the global style and apply them to the Google Chart Options Object
+    function extractColors() {
+        let gStyle = getComputedStyle(document.documentElement)
+        gchartOptions.colors = []
+        for (let i = 0; i < 5; ++i) {
+            let style = gStyle.getPropertyValue(`--main-color${i}`)
+            style = style.replaceAll(' ', '')
+            if (i < 4)
+                gchartOptions.colors.push(style)
+            if (i === 4)
+                gchartOptions.backgroundColor = style
+        }
     }
 
     /** INTERNAL SPACE MANAGEMENT **/
@@ -184,14 +195,20 @@ $(function () {
         result_videos = []
     }
 
+    function shuffleQueueClasses() {
+        let t = document.querySelectorAll('#qitem')
+        for (let i = 0; i < t.length; i++) {
+            t[i].className = `${i}`
+            queue_videos[i].idx = i
+        }
+    }
+
     /** WINDOW MEMORY **/
     function loadWindowMemory() {
         let json = window.localStorage.getItem('yt')
         if (json !== null)
             queue_videos = JSON.parse(json)
-        queue_videos.forEach(elem => {
-            renderQueueItem(elem)
-        })
+        queue_videos.forEach(elem => renderQueueItem(elem))
     }
 
     function updateLocalStorage() {
@@ -203,16 +220,13 @@ $(function () {
         evt.preventDefault()
 
         let ival = $input.val()
-        if (ival === '') {
-            $results.html('<span>Need to insert valid input...</span>')
-            return
-        } if (ival === '`test') {
-            $.getJSON('./assets/search.json', loadResults)
-            $input.val('')
-            return
-        }
 
-        $.ajax(createSearchAPILink($input.val())).then(loadResults, handleError)
+        if (ival === '')
+            $results.html('<span>Need to insert valid input...</span>')
+        else if (ival === '`test')
+            $.getJSON('./assets/search.json', loadResults)
+        else
+            $.ajax(createAPILink($input.val())).then(loadResults, handleError)
 
         $input.val('')
     }
@@ -231,14 +245,46 @@ $(function () {
         evt.preventDefault()
 
         let t = $(evt.target.parentNode)
-        console.log(t)
+
         t.fadeOut(fadetime, function () {
             queue_videos.splice(parseInt(t[0].className), 1)
             t.remove()
             updateLocalStorage()
             drawGoogleCharts()
             shuffleQueueClasses()
+            if (queue_videos.length === 0)
+                $queue.html('')
         })
+    }
+    
+    function handleClearButton(evt) {
+        evt.preventDefault()
+
+        let items = document.querySelectorAll('#qitem')
+        for (let i = 0; i < items.length; i++){
+            let t = $(items[i])
+            t.fadeOut(fadetime, function (){
+                t.remove()
+                if(i === items.length - 1)
+                    $queue.html('')
+            })
+        }
+        queue_videos = []
+
+        updateLocalStorage()
+        drawGoogleCharts()
+    }
+    
+    function handleDownloadButton(evt) {
+        evt.preventDefault()
+
+        let data = "text/json;charset=utf-8," +
+            encodeURIComponent(JSON.stringify(queue_videos, null, 2));
+        let link = $(`<a class="dwn" href="data:' + ${data} + '" download="${data.json}">download JSON</a>`)
+            .appendTo('#clear_area')
+
+        link[0].click()
+        link.remove()
     }
 
     function handleError(error) {
@@ -246,14 +292,7 @@ $(function () {
         alert('Sorry an error occurred')
     }
 
-    function shuffleQueueClasses() {
-        let t = document.querySelectorAll('#qitem')
-        for (let i = 0; i < t.length; i++) {
-            t[i].className = `${i}`
-            queue_videos[i].idx = i
-        }
-    }
-
+    // show table
     function showTable(evt) {
         let table = $(evt.target.parentNode).find('table')
         if (table[0].className === 'hide') {
@@ -267,13 +306,14 @@ $(function () {
 
     /** RENDERING FUNCTIONS **/
 
-    // RESULT
+    // Render thumbnail to an element
     function renderThumbnail(YObj, elem) {
         let thumbnail = $(`<img alt="${YObj.title}" src="${YObj.thumbnailUrl}">`)
             .addClass(`${YObj.idx}`)
         elem.append(thumbnail)
     }
 
+    // RESULT
     function renderResult(YObj) {
         let $ru = $('<div id="ritem">')
             .addClass(`${YObj.idx}`)
@@ -283,14 +323,25 @@ $(function () {
     }
 
     function renderAllResults() {
-        for (let i = 0; i < result_videos.length; i++)
-            renderResult(result_videos[i])
+        result_videos.forEach(elem => {renderResult(elem)})
+    }
+
+    // CLEAR BUTTON
+    function renderClearButton() {
+        let $cl = $('<div id="clear_area">')
+            .append($('<button id="clear">')
+                .text('CLEAR'))
+            .append($('<button id="dwn">')
+                .text('DOWNLOAD'))
+        $queue.append($cl)
     }
 
     // QUEUE
     function renderQueueItem(YObj) {
+        if($queue.html() === '')
+            renderClearButton()
         let $qu = $('<div id="qitem">')
-            .append($('<button>')
+            .append($('<button id="close">')
                 .text('X'))
             .addClass(`${YObj.idx}`)
 
@@ -306,7 +357,7 @@ $(function () {
     function renderQueue(YObj) {
         YObj.idx = queue_videos.length // reassign id
 
-        $.ajax(createStatisticsAPILink(YObj.vid)).then(function (data) {
+        $.ajax(createAPILink(YObj.vid, STATISTICS_API_TEMPLATE)).then(function (data) {
             YObj.addStats(data.items[0])
             queue_videos.push(YObj)
             updateLocalStorage()
@@ -317,35 +368,36 @@ $(function () {
 
     /** GOOGLE CHART FUNCTIONS **/
 
+    // return blank dataset
     function initData() {
         return createDataTable('NULL', ['NULL', 0])
     }
 
     function createDataTable(name, data) {
         let rdata = [['Title', name]]
-        data.forEach(elem => {
-            rdata.push([elem[0], elem[1]])
-        })
+        data.forEach(elem => rdata.push([elem[0], elem[1]]))
         return google.visualization.arrayToDataTable(rdata)
     }
 
     function drawGoogleCharts() {
-        // VIEW COUNT
-        chartOptions.title = 'View Count'
-        let data = queue_videos.length === 0 ? initData() : createDataTable('View', queue_videos.map(elem => {
-            return [elem.title, parseInt(elem.viewCount)]
-        }))
-        let chart = new google.visualization.PieChart($viewChart[0]);
+        let data, chart
 
-        chart.draw(data, chartOptions);
+        // VIEW COUNT
+        gchartOptions.title = 'View Count'
+        data = queue_videos.length === 0 ? initData() :
+            createDataTable('View', queue_videos.map(elem => {
+                return [elem.title, parseInt(elem.viewCount)] }))
+        chart = new google.visualization.PieChart($viewChart[0]);
+
+        chart.draw(data, gchartOptions);
 
         // LIKE COUNT
-        chartOptions.title = 'Like Count'
-        data = queue_videos.length === 0 ? initData() : createDataTable('Like', queue_videos.map(elem => {
-            return [elem.title, parseInt(elem.likeCount)]
-        }))
+        gchartOptions.title = 'Like Count'
+        data = queue_videos.length === 0 ? initData() :
+            createDataTable('Like', queue_videos.map(elem => {
+                return [elem.title, parseInt(elem.likeCount)] }))
         chart = new google.visualization.PieChart($likeChart[0]);
 
-        chart.draw(data, chartOptions);
+        chart.draw(data, gchartOptions);
     }
-})
+// })
