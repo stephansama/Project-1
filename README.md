@@ -6,7 +6,7 @@ A web application that selects and compares data points between two videos
 
 ### Technologies Used
 - HTML5 / CSS3
-- [Google Fonts](https://fonts.google.com/specimen/Ubuntu)
+- [Google Fonts](https://fonts.google.com/specimen/Inconsolata)
 - Javascript / [jQuery](https://jquery.com/)
 - [Google Charts](https://developers.google.com/chart)
 - [YouTube Data API](https://developers.google.com/youtube/v3)
@@ -20,5 +20,3 @@ A web application that selects and compares data points between two videos
 ### TO-DO:
 - add API switching functionality
 - style for mobile
-- add clear button to clear all items
-- add download button for statistics

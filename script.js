@@ -6,7 +6,7 @@
 // Accept user input inside a text field
 // Submit query to YouTube Data API
 // retrieve 5 possible YouTube videos
-// upon a result video selection add it to local queue
+// once a result video is selected add it to local queue
 // load google chart with local queue data
 // update local queue to the window storage for persistence
 // clear button to fade out and remove all queue item elements
@@ -366,13 +366,7 @@ $(function () {
     }
 
     /** GOOGLE CHART FUNCTIONS **/
-
-    // return blank dataset
-    function initData() {
-        return createDataTable('NULL', ['NULL', 0])
-    }
-
-    function createDataTable(name, data) {
+    function createDataTable(name = 'NULL', data = ['NULL', 0]) {
         let rdata = [['Title', name]]
         data.forEach(elem => rdata.push([elem[0], elem[1]]))
         return google.visualization.arrayToDataTable(rdata)
@@ -383,7 +377,7 @@ $(function () {
 
         // VIEW COUNT
         gchartOptions.title = 'Views'
-        data = queue_videos.length === 0 ? initData() :
+        data = queue_videos.length === 0 ? createDataTable() :
             createDataTable('View', queue_videos.map(elem => {
                 return [elem.title, parseInt(elem.viewCount)] }))
         chart = new google.visualization.PieChart($viewChart[0]);
@@ -392,7 +386,7 @@ $(function () {
 
         // LIKE COUNT
         gchartOptions.title = 'Likes'
-        data = queue_videos.length === 0 ? initData() :
+        data = queue_videos.length === 0 ? createDataTable() :
             createDataTable('Like', queue_videos.map(elem => {
                 return [elem.title, parseInt(elem.likeCount)] }))
         chart = new google.visualization.PieChart($likeChart[0]);
