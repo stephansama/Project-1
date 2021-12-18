@@ -19,10 +19,10 @@ $(function () {
     // const API = 'AIzaSyANIJpTgj86KjrZvtD7NyHjfKPKgwxIu-U'
 
     // Template strings
-    const SEARCH_API_TEMPLATE = 'https://youtube.googleapis.com/youtube/v3/search?type=video&part=snippet&q=[QUERY]&key=[API]'
     const STATISTICS_API_TEMPLATE = 'https://www.googleapis.com/youtube/v3/videos?part=statistics&id=[QUERY]&key=[API]'
-    const YTLINK_TEMPLATE = 'https://www.youtube.com/watch?v=[ID]'
+    const SEARCH_API_TEMPLATE = 'https://youtube.googleapis.com/youtube/v3/search?type=video&part=snippet&q=[QUERY]&key=[API]'
     const YTCHANNEL_TEMPLATE = 'https://www.youtube.com/channel/[ID]'
+    const YTLINK_TEMPLATE = 'https://www.youtube.com/watch?v=[ID]'
 
     // Internal video object storage
     let result_videos = []
@@ -95,10 +95,10 @@ $(function () {
     /** INITIAL LOADING **/
     function initApplication() {
         // Load the Visualization API and the core chart package.
-        google.charts.load('current', {'packages': ['corechart']});
+        google.charts.load('current', {'packages': ['corechart']})
 
         // Set a callback to run when the Google Visualization API is loaded.
-        google.charts.setOnLoadCallback(drawGoogleCharts);
+        google.charts.setOnLoadCallback(drawGoogleCharts)
 
         loadWindowMemory()
     }
@@ -112,8 +112,8 @@ $(function () {
         return template.replace('[ID]', videoId)
     }
 
-    function createInfo(YObj, hidden = true) {
-        let $t = $(`<table style="display: ${hidden ? 'none' : 'block'};">`).html(`
+    function createInfoTable(YObj, hidden = true) {
+        return $(`<table style="display: ${hidden ? 'none' : 'block'};">`).html(`
         ${createTableRow('Channel', YObj.channelTitle, createYTLink(YObj.channelId, YTCHANNEL_TEMPLATE))}
         ${createTableRow('Title', YObj.title, createYTLink(YObj.vid))}
         ${createTableRow('Published', YObj.publishTime)}
@@ -122,7 +122,6 @@ $(function () {
             `${createTableRow('Views', YObj.viewCount)}
             ${createTableRow('Likes', YObj.likeCount)}` : ''}`)
             .addClass(hidden ? 'hide' : 'show')
-        return $t
     }
 
     function createTableRow(left, right, link="", blank=true){
@@ -138,15 +137,12 @@ $(function () {
         let istylehtml = ''
         let index = 1  // compensate for clear and button area
 
-        // iterate through the number of repetitions
-        for (let i = 0; i < repetitions; i++) {
-            // go through all the available colors
-            for (let k = 0; k < gchartOptions.colors.length; ++k) {
-                let t = template.replace('[n]', `${index++ + 1}`);
-                t = t.replace('[val]', gchartOptions.colors[k])
-                istylehtml += t
-            }
-        }
+        // iterate through the number of repetitions then go through all the available colors
+        for (let i = 0; i < repetitions; i++)
+            for (let k = 0; k < gchartOptions.colors.length; ++k)
+                istylehtml += template
+                    .replace('[n]', `${index++ + 1}`)
+                    .replace('[val]', gchartOptions.colors[k])
 
         istyle.html(istylehtml)
         $('head').append(istyle)
@@ -165,16 +161,14 @@ $(function () {
 
     /** INTERNAL SPACE MANAGEMENT **/
     function loadResults(data) {
-        if ($results.html() !== null) clearResults()
-        for(let i = 0; i < data.items.length; ++i){
-            let t = new YVid(data.items[i], i)
-            result_videos.push(t)
-        }
+        if ($results.html() !== null) $results.html('')
+        for(let i = 0; i < data.items.length; ++i)
+            result_videos.push(new YVid(data.items[i], i))
         renderAllResults()
     }
 
     function clearResults() {
-        $results.html('')
+        clearContainer('#ritem',$results)
         result_videos = []
     }
 
@@ -214,9 +208,7 @@ $(function () {
     }
 
     function handleSelectVideo(evt) {
-        evt.preventDefault()
-        let kept = result_videos[parseInt(evt.target.className)]
-        renderQueue(kept)
+        renderQueue(result_videos[parseInt(evt.target.className)])
         clearResults()
     }
 
@@ -238,14 +230,7 @@ $(function () {
     function handleClearButton(evt) {
         evt.preventDefault()
 
-        let items = document.querySelectorAll('#qitem')
-        for (let i = 0; i < items.length; i++){
-            let t = $(items[i])
-            t.fadeOut(fadetime, function (){
-                t.remove()
-                if(i === items.length - 1) $queue.html('')
-            })
-        }
+        clearContainer('#qitem', $queue)
         queue_videos = []
 
         updateLocalStorage()
@@ -281,6 +266,16 @@ $(function () {
     }
 
     /** RENDERING FUNCTIONS **/
+    
+    function clearContainer(item_id, container) {
+        let items = document.querySelectorAll(item_id)
+        for (let i = 0; i < items.length; i++){
+            let t = $(items[i]).fadeOut(fadetime, function (){
+                t.remove()
+                if(i === items.length - 1) container.html('')
+            })
+        }
+    }
 
     // Render thumbnail to an element
     function renderThumbnail(YObj, elem) {
@@ -294,7 +289,7 @@ $(function () {
         let $ru = $('<div id="ritem">')
             .addClass(`${YObj.idx}`)
         renderThumbnail(YObj, $ru)
-        $ru.append(createInfo(YObj, false))
+        $ru.append(createInfoTable(YObj, false))
         $results.append($ru)
     }
 
@@ -305,10 +300,8 @@ $(function () {
     // CLEAR BUTTON
     function renderClearButton() {
         let $cl = $('<div id="clear_area">')
-            .append($('<button id="clear">')
-                .text('CLEAR'))
-            .append($('<button id="dwn">')
-                .text('DOWNLOAD'))
+            .append($('<button id="clear">').text('CLEAR'))
+            .append($('<button id="dwn">').text('DOWNLOAD'))
         $queue.append($cl)
     }
 
@@ -316,15 +309,14 @@ $(function () {
     function renderQueueItem(YObj) {
         if($queue.html() === '') renderClearButton()
         let $qu = $('<div id="qitem">')
-            .append($('<button id="close">')
-                .text('X'))
+            .append($('<button id="close">').text('X'))
             .addClass(`${YObj.idx}`)
 
         renderThumbnail(YObj, $qu)
 
         $qu.append($(`<a href="${createYTLink(YObj.vid)}" target="_blank">`)
             .text(`${YObj.title.slice(0, 35)} ->`))
-            .append(createInfo(YObj))
+            .append(createInfoTable(YObj))
 
         $queue.append($qu)
     }
