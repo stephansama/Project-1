@@ -56,7 +56,7 @@ $(function () {
     $queue.on('click', 'button#close', handleRemoveFromQueue)
     $queue.on('click', 'button#clear', handleClearButton)
     $queue.on('click', 'button#dwn', handleDownloadButton)
-    $queue.on('click', 'img', showTable)
+    $queue.on('click', 'img', handleShowTable)
 
     // window state change events
     $(window).resize(function () { drawGoogleCharts() })
@@ -215,9 +215,7 @@ $(function () {
     function handleRemoveFromQueue(evt) {
         evt.preventDefault()
 
-        let t = $(evt.target.parentNode)
-
-        t.fadeOut(fadetime, function () {
+        let t = $(evt.target.parentNode).fadeOut(fadetime, function () {
             queue_videos.splice(parseInt(t[0].className), 1)
             t.remove()
             updateLocalStorage()
@@ -254,7 +252,7 @@ $(function () {
     }
 
     // show table
-    function showTable(evt) {
+    function handleShowTable(evt) {
         let table = $(evt.target.parentNode).find('table')
         if (table[0].className === 'hide') {
             table[0].className = 'show'
