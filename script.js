@@ -87,8 +87,8 @@ $(function () {
         addStats(ajax_obj) {
             this.viewCount = ajax_obj.statistics.viewCount
             this.likeCount = ajax_obj.statistics.likeCount
-            this.favoriteCount = ajax_obj.statistics.favoriteCount
             this.commentCount = ajax_obj.statistics.commentCount
+            this.favoriteCount = ajax_obj.statistics.favoriteCount
         }
     }
 
@@ -105,46 +105,29 @@ $(function () {
 
     /** GENERATOR FUNCTIONS **/
     function createAPILink(id, template = SEARCH_API_TEMPLATE) {
-        let t = template.replace('[QUERY]', id)
-        t = t.replace('[API]', API)
-        return t
+        return template.replace('[QUERY]', id).replace('[API]', API)
     }
 
     function createYTLink(videoId, template = YTLINK_TEMPLATE) {
         return template.replace('[ID]', videoId)
     }
 
-    // create table to hold YT data information
     function createInfo(YObj, hidden = true) {
-        let $t = $(`<table style="display: ${hidden ? 'none' : 'block'};">`)
-        $t.html(`
-        <tr>
-        <td>Channel</td>
-        <td><a href="${createYTLink(YObj.channelId, YTCHANNEL_TEMPLATE)}" target="_blank">${YObj.channelTitle}</a></td>
-        </tr>
-        <tr>
-        <td>Title</td>
-        <td><a href="${createYTLink(YObj.vid)}" target="_blank">${YObj.title}</a></td>
-        </tr>
-        <tr>
-        <td>Published</td>
-        <td>${YObj.publishTime}</td>
-        </tr>
-        <tr>
-        <td>Description</td>
-        <td>${YObj.description}</td>
-        </tr>
-        ${YObj.viewCount !== undefined ? // only add viewCount if it is updated
-        `<tr>
-        <td>Views</td>
-        <td>${YObj.viewCount}</td>
-        </tr>
-        <tr>
-        <td>Likes</td>
-        <td>${YObj.likeCount}</td>
-        </tr>` : ''}`)
+        let $t = $(`<table style="display: ${hidden ? 'none' : 'block'};">`).html(`
+        ${createTableRow('Channel', YObj.channelTitle, createYTLink(YObj.channelId, YTCHANNEL_TEMPLATE))}
+        ${createTableRow('Title', YObj.title, createYTLink(YObj.vid))}
+        ${createTableRow('Published', YObj.publishTime)}
+        ${createTableRow('Description', YObj.description)}
+        ${YObj.viewCount ? // only add viewCount if it is updated
+            `${createTableRow('Views', YObj.viewCount)}
+            ${createTableRow('Likes', YObj.likeCount)}` : ''}`)
             .addClass(hidden ? 'hide' : 'show')
         return $t
+    }
+
+    function createTableRow(left, right, link="", blank=true){
+        return `<tr><td>${left}</td>
+        <td>${link ? `<a href="${link}" ${blank ? 'target="_blank"':''}>`:''}${right}</td></tr>`
     }
 
     /** Global Styling **/
@@ -174,8 +157,7 @@ $(function () {
         let gStyle = getComputedStyle(document.documentElement)
         gchartOptions.colors = []
         for (let i = 0; i < 5; ++i) {
-            let style = gStyle.getPropertyValue(`--main-color${i}`)
-            style = style.replaceAll(' ', '')
+            let style = gStyle.getPropertyValue(`--main-color${i}`).replaceAll(' ', '')
             if (i < 4) gchartOptions.colors.push(style)
             if (i === 4) gchartOptions.backgroundColor = style
         }
@@ -183,13 +165,11 @@ $(function () {
 
     /** INTERNAL SPACE MANAGEMENT **/
     function loadResults(data) {
-        if ($results.html() !== null)
-            clearResults()
-        let i = 0;
-        data.items.forEach(elem => {
-            let t = new YVid(elem, i++)
+        if ($results.html() !== null) clearResults()
+        for(let i = 0; i < data.items.length; ++i){
+            let t = new YVid(data.items[i], i)
             result_videos.push(t)
-        })
+        }
         renderAllResults()
     }
 
@@ -251,8 +231,7 @@ $(function () {
             updateLocalStorage()
             drawGoogleCharts()
             shuffleQueueClasses()
-            if (queue_videos.length === 0)
-                $queue.html('')
+            if (queue_videos.length === 0) $queue.html('')
         })
     }
     
@@ -264,8 +243,7 @@ $(function () {
             let t = $(items[i])
             t.fadeOut(fadetime, function (){
                 t.remove()
-                if(i === items.length - 1)
-                    $queue.html('')
+                if(i === items.length - 1) $queue.html('')
             })
         }
         queue_videos = []
@@ -277,8 +255,7 @@ $(function () {
     function handleDownloadButton(evt) {
         evt.preventDefault()
 
-        let data = "text/json;charset=utf-8," +
-            encodeURIComponent(JSON.stringify(queue_videos, null, 2));
+        let data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(queue_videos, null, 2));
         let link = $(`<a class="dwn" href="data:' + ${data} + '" download="${data.json}">download JSON</a>`)
             .appendTo('#clear_area')
 
@@ -337,8 +314,7 @@ $(function () {
 
     // QUEUE
     function renderQueueItem(YObj) {
-        if($queue.html() === '')
-            renderClearButton()
+        if($queue.html() === '') renderClearButton()
         let $qu = $('<div id="qitem">')
             .append($('<button id="close">')
                 .text('X'))
